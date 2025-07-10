@@ -117,16 +117,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#f8f9fa',
     borderBottomWidth: 2,
-    borderBottomColor: '#065a82',
+    borderBottomColor: '#F79300',
   },
   appBarTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0891b2',
+    color: '#F79300',
   },
   userName: {
     fontSize: 16,
-    color: '#0891b2',
+    color: '#F79300',
     textTransform: 'capitalize',
   },
   logo: {
@@ -154,11 +154,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#F79300',
   },
   loadingText: {
     fontSize: 18,
-    color: '#0891b2',
+    color: '#F79300',
   },
 });
 

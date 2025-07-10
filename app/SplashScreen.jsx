@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-const logo = require('../assets/images/logo.png');
+const logo = require('../assets/images/logo-hidayah.png');
 
 const SplashScreen = ({ navigation }) => {
   const router = useRouter();

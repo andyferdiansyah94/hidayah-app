@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   button: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   bottomBar: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     height: 50,
     width: '100%',
     position: 'absolute',
