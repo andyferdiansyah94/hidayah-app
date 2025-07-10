@@ -36,7 +36,7 @@ const Profile = () => {
   }, []);
 
   return (
-    <ImageBackground source={require('../../assets/images/logo.png')} style={styles.background}>
+    <ImageBackground source={require('../../assets/images/logo-hidayah.png')} style={styles.background} resizeMode="cover">
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Hidayah Digital Printing</Text>
@@ -48,16 +48,6 @@ const Profile = () => {
           <Text style={styles.email}>{user?.email || 'hidayahprinting@gmail.com'}</Text>
           <Text style={styles.email}>{user?.email || '+031546321'}</Text>
         </View>
-        {/* <View style={styles.statsContainer}>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>120</Text>
-            <Text style={styles.statLabel}>Pesanan</Text>
-          </View>
-          <View style={styles.stat}>
-            <Text style={styles.statValue}>15</Text>
-            <Text style={styles.statLabel}>Proyek Aktif</Text>
-          </View>
-        </View> */}
         <Button mode="contained" style={styles.button} onPress={() => setIsModalVisible(true)}>
           Logout
         </Button>
@@ -88,7 +78,9 @@ const Profile = () => {
 
 const styles = StyleSheet.create({
   background: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
     backgroundColor: '#f5f5f5'
   },
   container: {
@@ -132,6 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
+    textTransform: 'capitalize',
   },
   email: {
     fontSize: 16,

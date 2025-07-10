@@ -87,7 +87,7 @@ const Home = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.appBar}>
-        <Image source={require('../../assets/images/logoo.png')} style={styles.logo} />
+        <Image source={require('../../assets/images/logo-hidayah.png')} style={styles.logo} />
         <Text style={styles.appBarTitle}>Dashboard</Text>
         <Text style={styles.userName}>{user?.nama}</Text>
       </View>
@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     color: '#0891b2',
+    textTransform: 'capitalize',
   },
   logo: {
     width: 40,

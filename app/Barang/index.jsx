@@ -16,6 +16,7 @@ const Barang = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isSuccessVisible, setIsSuccessVisible] = useState(false);
   const [itemName, setItemName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [quantity, setQuantity] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
@@ -88,6 +89,10 @@ const Barang = () => {
     setEditItem(null);
   };
 
+  const filteredData = data.filter(item =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -102,6 +107,13 @@ const Barang = () => {
       <Text style={styles.addButtonText}>Tambah Data</Text>
     </TouchableOpacity>
 
+    <TextInput
+      style={styles.searchInput}
+      placeholder='Cari Nama Barang...'
+      value={searchTerm}
+      onChangeText={setSearchTerm}
+    />
+
       <View style={styles.tableHeader}>
         <Text style={styles.tableHeaderText}>Name</Text>
         <Text style={styles.tableHeaderText}>Quantity</Text>
@@ -111,7 +123,7 @@ const Barang = () => {
       </View>
 
       <FlatList
-        data={data}
+        data={filteredData}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.tableRow}>
@@ -370,6 +382,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 8,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 40,
+    marginBottom: 15,
   },
 });
 

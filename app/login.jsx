@@ -6,7 +6,7 @@ import ReactNativeModal from 'react-native-modal';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const logo = require('../assets/images/logo.png');
+const logo = require('../assets/images/logo-hidayah.png');
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -71,7 +71,7 @@ const Login = () => {
         }, 1500);
       }      
     } catch (error) {
-      console.error('Login Error:', error);
+      // console.error('Login Error:', error);
       setErrorModalVisible(true);
     }
   };
