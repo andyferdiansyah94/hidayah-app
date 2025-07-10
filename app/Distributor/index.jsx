@@ -111,7 +111,7 @@ const Distributor = () => {
                         <Text style={styles.employeeText}>{item.address}</Text>
                         <Text style={styles.employeeText}>{item.phone}</Text>
                         <TouchableOpacity onPress={() => handleEditDataModal(item)} style={styles.editButton}>
-                            <Icon name="create" size={20} color="#0891b2" />
+                            <Icon name="create" size={20} color="#F79300" />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDeleteData(item.id)} style={styles.deleteButton}>
                             <Icon name="trash" size={20} color="red" />
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },    
     addButton: {
-        backgroundColor: '#0891b2',
+        backgroundColor: '#F79300',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     modalButton: {
-        backgroundColor: '#0891b2',
+        backgroundColor: '#F79300',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
