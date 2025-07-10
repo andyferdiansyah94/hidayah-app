@@ -3,7 +3,7 @@ import React from 'react';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 
 const TabBar = ({ state, descriptors, navigation }) => {
-    const primaryColor = '#0891b2';
+    const primaryColor = '#F79300';
     const greyColor = '#737373';
 
     const icons = {

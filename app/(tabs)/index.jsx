@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F79300',
+    backgroundColor: '#FFFFFF',
   },
   loadingText: {
     fontSize: 18,

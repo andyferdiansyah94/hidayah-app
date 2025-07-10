@@ -36,7 +36,7 @@ const Profile = () => {
   }, []);
 
   return (
-    <ImageBackground source={require('../../assets/images/logo-hidayah.png')} style={styles.background} resizeMode="cover">
+    <ImageBackground source={require('../../assets/images/logo.png')} style={styles.background} resizeMode="cover">
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Hidayah Digital Printing</Text>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 23,
     paddingTop: 20,
     fontWeight: 'bold',
-    color: '#0891b2',
+    color: '#F79300',
   },
   subtitle: {
     fontSize: 16,
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   },
   avatar: {
     marginBottom: 10,
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
   },
   name: {
     fontSize: 24,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   button: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     width: '90%',
   },
   modalOverlay: {

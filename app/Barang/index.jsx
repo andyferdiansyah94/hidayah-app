@@ -143,7 +143,7 @@ const Barang = () => {
                   setIsEditModalVisible(true);
                 }}
               >
-                <Icon name="create" size={24} color="#0891b2" />
+                <Icon name="create" size={24} color="#F79300" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.editButton} onPress={() => handleDeleteData(item.id)}>
                 <Icon name="trash" size={24} color="red" />
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   addButton: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   submitButton: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     padding: 12,
     borderRadius: 4,
     alignItems: 'center',

@@ -14,7 +14,7 @@ export default function DashboardButton({ icon, label, count, onPress }: Dashboa
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.touchable}>
       <Card style={styles.card} elevation={3}>
         <Card.Content style={styles.content}>
-          <Avatar.Icon icon={icon} size={36} style={styles.icon} />
+          <Avatar.Icon icon={icon} size={50} style={styles.icon} />
           <Text style={styles.label}>{label}</Text>
           <Text style={styles.count}>{count}</Text>
         </Card.Content>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   icon: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     color: '#0891b2',
   },
   label: {
