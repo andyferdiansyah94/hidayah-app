@@ -39,7 +39,8 @@ const Distributor = () => {
             setDistributors([...distributors, response.data.data]);
             setSuccessVisible(true);
             setModalVisible(false);
-            setTimeout(() => setSuccessVisible(false), 2000);
+            resetForm();
+            // setTimeout(() => setSuccessVisible(false), 2000);
         } catch (error) {
             console.error('Error adding distributor: ', error);
         }
@@ -58,7 +59,8 @@ const Distributor = () => {
             setDistributors(updatedDistributors);
             setSuccessVisible(true);
             setModalVisible(false);
-            setTimeout(() => setSuccessVisible(false), 2000);
+            resetForm();
+            // setTimeout(() => setSuccessVisible(false), 2000);
         } catch (error) {
             console.error('Error editing distributor: ', error);
         }
@@ -71,6 +73,14 @@ const Distributor = () => {
         } catch (error) {
             console.error('Error deleting distributor: ', error);
         }
+    };
+
+    const resetForm = () => {
+        setName('');
+        setPhone('');
+        setAddress('');
+        setEditMode(false);
+        setSelectedItem(null);
     };
 
     const handleEditDataModal = (item) => {
@@ -91,7 +101,9 @@ const Distributor = () => {
                 <Text style={styles.headerTitle}>Data Distributor</Text>
             </View>
 
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+            <TouchableOpacity style={styles.addButton} onPress={() => {
+                resetForm();
+                setModalVisible(true)}}>
                 <Text style={styles.addButtonText}>Tambah Data</Text>
             </TouchableOpacity>
 
@@ -124,9 +136,13 @@ const Distributor = () => {
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
+                onRequestClose={() => {
+                    resetForm();
+                    setModalVisible(false)}}
             >
-                <TouchableOpacity style={styles.modalOverlay} onPressOut={() => setModalVisible(false)}>
+                <TouchableOpacity style={styles.modalOverlay} onPressOut={() => {
+                    resetForm();
+                    setModalVisible(false)}}>
                     <TouchableOpacity style={styles.modalContent} onPress={() => {}}>
                         <Text style={styles.modalTitle}>{editMode ? 'Edit Data' : 'Tambah Data'}</Text>
                         <TextInput
