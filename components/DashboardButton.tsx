@@ -7,14 +7,15 @@ interface DashboardButtonProps {
   label: string;
   count: number;
   onPress?: () => void;
+  iconColor?: string;
 }
 
-export default function DashboardButton({ icon, label, count, onPress }: DashboardButtonProps) {
+export default function DashboardButton({ icon, label, count, onPress, iconColor = "#FFF" }: DashboardButtonProps) {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={styles.touchable}>
       <Card style={styles.card} elevation={3}>
         <Card.Content style={styles.content}>
-          <Avatar.Icon icon={icon} size={50} style={styles.icon} />
+          <Avatar.Icon icon={icon} size={50} style={styles.icon} color={iconColor} />
           <Text style={styles.label}>{label}</Text>
           <Text style={styles.count}>{count}</Text>
         </Card.Content>

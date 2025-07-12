@@ -2,6 +2,7 @@ import { View, StyleSheet, ScrollView, SafeAreaView, StatusBar, Text, Image } fr
 import React, { useEffect, useState } from 'react';
 import DashboardButton from '../../components/DashboardButton';
 import { useRouter } from 'expo-router';
+import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Home = () => {
@@ -78,14 +79,20 @@ const Home = () => {
   if (loading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <StatusBar barStyle="dark-content" />
+        <LottieView
+          source={require('../../assets/lottie/loader.json')}  // <— sesuaikan path ke animasi kamu
+          autoPlay
+          loop
+          style={styles.loader}
+        />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
       <View style={styles.appBar}>
         <Image source={require('../../assets/images/logo-hidayah.png')} style={styles.logo} />
         <Text style={styles.appBarTitle}>Dashboard</Text>
@@ -159,6 +166,10 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 18,
     color: '#F79300',
+  },
+  loader: {
+    width: 150,
+    height: 150,
   },
 });
 
