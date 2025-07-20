@@ -106,7 +106,7 @@ const Kategori = () => {
                     setIsEditModalVisible(true);
                   }}
                 >
-                  <Icon name="create" size={24} color="#0891b2" />
+                  <Icon name="create" size={24} color="#F79300" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.editButton}
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },  
   addButton: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     padding: 12,
     borderRadius: 5,
     alignItems: 'center',
