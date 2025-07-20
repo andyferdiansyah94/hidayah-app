@@ -325,14 +325,14 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   buttonMasukan: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginBottom: 16,
   },
   buttonInput: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',

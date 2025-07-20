@@ -79,7 +79,7 @@ const Pelanggan = () => {
             <Text style={[styles.cell, styles.cellAddress]}>{item.alamat}</Text>
             <Text style={[styles.cell, styles.cellPhone]}>{item.phone}</Text>
             <TouchableOpacity style={styles.cellAction} onPress={() => openEditModal(item)}>
-                <Icon name="create" size={20} color="#0891b2" />
+                <Icon name="create" size={20} color="#F79300" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.cellAction} onPress={() => handleDeleteData(item.id)}>
                 <Icon name="trash" size={20} color="red" />
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },    
     addButton: {
-        backgroundColor: '#0891b2',
+        backgroundColor: '#F79300',
         padding: 12,
         borderRadius: 8,
         margin: 16,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     saveButton: {
-        backgroundColor: '#0891b2',
+        backgroundColor: '#F79300',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
