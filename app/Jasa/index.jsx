@@ -115,7 +115,7 @@ const Jasa = () => {
                         <Text style={styles.tableCell}>{item.price}</Text>
                         <Text style={styles.tableCell}>{item.category}</Text>
                         <TouchableOpacity onPress={() => handleEditData(item)}>
-                            <Icon name="create" size={20} color="#0891b2" />
+                            <Icon name="create" size={20} color="#F79300" />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDeleteData(item.id)}>
                             <Icon name="trash" size={20} color="#e63946" />
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     addButton: {
-        backgroundColor: '#0891b2',
+        backgroundColor: '#F79300',
         padding: 12,
         borderRadius: 5,
         margin: 16,
