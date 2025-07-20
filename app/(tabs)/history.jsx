@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   appBarTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#0891b2',
+    color: '#F79300',
   },
   container: {
     flex: 1,
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   totalContainer: {
-    backgroundColor: '#e0e7ff',
+    backgroundColor: '#ffd699ff',
     paddingVertical: 10,
     borderRadius: 8,
     marginBottom: 10,
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#0891b2',
+    color: '#000000ff',
   },
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#e0e7ff',
+    backgroundColor: '#ffd699ff',
     paddingVertical: 8,
     borderRadius: 8,
     marginBottom: 5,
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#0891b2',
+    color: '#000000ff',
   },
   table: {
     marginTop: 10,
