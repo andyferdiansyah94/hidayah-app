@@ -106,7 +106,7 @@ const EmployeeData = () => {
                                 setEditModalVisible(true);
                             }}
                         >
-                            <Icon name="create" size={24} color="#0891b2" />
+                            <Icon name="create" size={24} color="#F79300" />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDeleteData(item.id)}>
                             <Icon name="trash" size={24} color="red" />
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     addButton: {
-        backgroundColor: '#0891b2',
+        backgroundColor: '#F79300',
         padding: 10,
         borderRadius: 5,
         alignItems: 'center',
