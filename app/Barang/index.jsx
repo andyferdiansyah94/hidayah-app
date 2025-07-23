@@ -14,7 +14,6 @@ const Barang = () => {
   const [categories, setCategories] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [isSuccessVisible, setIsSuccessVisible] = useState(false);
   const [itemName, setItemName] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [quantity, setQuantity] = useState('');
@@ -23,6 +22,9 @@ const Barang = () => {
   const [editItem, setEditItem] = useState(null);
   const [sortOption, setSortOption] = useState('latest');
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [isSuccessVisible, setIsSuccessVisible] = useState(false);
+  
 
   const fetchData = async () => {
     try {
@@ -100,6 +102,12 @@ const Barang = () => {
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -164,6 +172,8 @@ const Barang = () => {
               </View>
             </View>
           )}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
           contentContainerStyle={{ paddingBottom: 10 }}
           style={{ flex: 1 }}
         />
