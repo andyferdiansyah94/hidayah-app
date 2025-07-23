@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useNavigation } from 'expo-router';
-import { Pi } from 'lucide-react-native';
 
 const API_URL = 'http://10.0.2.2:8000/api/barang';
 const CATEGORY_API_URL = 'http://10.0.2.2:8000/api/kategori';
