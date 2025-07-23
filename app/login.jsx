@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useRouter } from 'expo-router';
 import ReactNativeModal from 'react-native-modal';
@@ -16,12 +16,15 @@ const Login = () => {
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!username || !password) {
       setErrorModalVisible(true);
       return;
     }
+
+    setIsLoading(true);
   
     try {
       const response = await axios.post('http://10.0.2.2:8000/api/login', {
@@ -58,6 +61,8 @@ const Login = () => {
       
         const role = userData.role;
         const menus = menuConfig[role];
+
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
       
         setSuccessModalVisible(true);
       
@@ -72,7 +77,13 @@ const Login = () => {
       }      
     } catch (error) {
       // console.error('Login Error:', error);
+
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
+
       setErrorModalVisible(true);
+      
+    }finally {
+      setIsLoading(false);
     }
   };
 
@@ -108,15 +119,19 @@ const Login = () => {
             <Icon
               name={isPasswordVisible ? 'eye-off' : 'eye'}
               size={24}
-              color="#0891b2"
+              color="#F79300"
             />
           </TouchableOpacity>
         </View>
       </View>
       
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Masuk</Text>
+        <TouchableOpacity style={[styles.button, isLoading && {backgroundColor: '#ccc'}]} onPress={handleLogin} disabled={isLoading}>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>Masuk</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -248,7 +263,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   closeButton: {
-    backgroundColor: '#0891b2',
+    backgroundColor: '#F79300',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
