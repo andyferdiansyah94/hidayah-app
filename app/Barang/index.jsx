@@ -175,6 +175,11 @@ const Barang = () => {
           refreshing={refreshing}
           onRefresh={handleRefresh}
           contentContainerStyle={{ paddingBottom: 10 }}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyComponent}>
+              <Text style={{ color: '#888' }}>Tidak ada data yang ditemukan</Text>
+            </View>
+          )}
           style={{ flex: 1 }}
         />
 
@@ -512,6 +517,12 @@ const styles = StyleSheet.create({
   sortOptionText: {
     fontSize: 16,
     color: '#333',
+  },
+  emptyComponent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
 });
 
