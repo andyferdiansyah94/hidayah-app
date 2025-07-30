@@ -3,26 +3,37 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet, TextInput, FlatList } 
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import { set, sub } from 'react-native-reanimated';
 
 const Distributor = () => {
     const navigation = useNavigation();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [editMode, setEditMode] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [editItem, setEditItem] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null); 
-    const [name, setName] = useState('');
+    const [itemName, setItemName] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
-    const [successVisible, setSuccessVisible] = useState(false);
+    const [isSuccessVisible, setIsSuccessVisible] = useState(false);
     const [distributors, setDistributors] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const [searchTerms, setSearchTerms] = useState('');
+    const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+    const [sortOption, setSortOption] = useState('latest'); // Default sort by latest
 
     // Fetching distributors data from API
     useEffect(() => {
         fetchDistributors();
-    }, []);
+    }, [searchTerms, sortOption]);
 
     const fetchDistributors = async () => {
         try {
-            const response = await axios.get('http://10.0.2.2:8000/api/distributors');
+            const response = await axios.get('http://10.0.2.2:8000/api/distributors', {
+                params: {
+                    search: searchTerms,
+                    sort: sortOption
+                },
+            });
             setDistributors(response.data.data);
         } catch (error) {
             console.error('Error fetching distributors: ', error);
@@ -31,16 +42,17 @@ const Distributor = () => {
 
     const handleAddData = async () => {
         try {
-            const response = await axios.post('http://10.0.2.2:8000/api/distributors', {
-                name,
-                phone,
-                address
-            });
-            setDistributors([...distributors, response.data.data]);
-            setSuccessVisible(true);
-            setModalVisible(false);
+            const newItem = {
+                name: itemName,
+                phone: phone,
+                address: address
+            };
+            const response = await axios.post('http://10.0.2.2:8000/api/distributors', newItem);
+            setDistributors([response.data.data, ...distributors]);
+            setIsModalVisible(false);
+            setIsSuccessVisible(true);
+            setTimeout(() => setIsSuccessVisible(false), 2000);
             resetForm();
-            // setTimeout(() => setSuccessVisible(false), 2000);
         } catch (error) {
             console.error('Error adding distributor: ', error);
         }
@@ -48,48 +60,57 @@ const Distributor = () => {
 
     const handleEditData = async () => {
         try {
-            const response = await axios.put(`http://10.0.2.2:8000/api/distributors/${selectedItem.id}`, {
-                name,
-                phone,
-                address
-            });
-            const updatedDistributors = distributors.map(item => 
-                item.id === selectedItem.id ? response.data.data : item
+            const updatedItem = { name: itemName, phone: phone, address: address };
+            await axios.put(`http://10.0.2.2:8000/api/distributors/${editItem.id}`, updatedItem);
+            const updatedDistributors = distributors.map(item =>
+                item.id === editItem.id ? { ...item, ...updatedItem } : item
             );
             setDistributors(updatedDistributors);
-            setSuccessVisible(true);
-            setModalVisible(false);
+            setIsEditModalVisible(false);
+            setIsSuccessVisible(true);
+            setTimeout(() => setIsSuccessVisible(false), 2000);
             resetForm();
-            // setTimeout(() => setSuccessVisible(false), 2000);
         } catch (error) {
             console.error('Error editing distributor: ', error);
         }
     };
 
+    
     const handleDeleteData = async (id) => {
         try {
             await axios.delete(`http://10.0.2.2:8000/api/distributors/${id}`);
             setDistributors(distributors.filter(item => item.id !== id));
         } catch (error) {
-            console.error('Error deleting distributor: ', error);
+            console.error('Error deleting data: ', error);
         }
     };
 
     const resetForm = () => {
-        setName('');
+        setItemName('');
         setPhone('');
         setAddress('');
-        setEditMode(false);
         setSelectedItem(null);
+        setEditItem(null);
     };
 
     const handleEditDataModal = (item) => {
-        setEditMode(true);
-        setSelectedItem(item);
-        setName(item.name);
+        setEditItem(item);
+        setItemName(item.name);
         setPhone(item.phone);
         setAddress(item.address);
-        setModalVisible(true);
+        setIsEditModalVisible(true);
+    };
+
+    const filterDistributors = distributors.filter(item =>
+        item.name.toLowerCase().includes(searchTerms.toLowerCase()) ||
+        item.address.toLowerCase().includes(searchTerms.toLowerCase()) ||
+        item.phone.toLowerCase().includes(searchTerms.toLowerCase())
+    );
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchDistributors();
+        setRefreshing(false);
     };
 
     return (
@@ -101,55 +122,72 @@ const Distributor = () => {
                 <Text style={styles.headerTitle}>Data Distributor</Text>
             </View>
 
-            <TouchableOpacity style={styles.addButton} onPress={() => {
-                resetForm();
-                setModalVisible(true)}}>
-                <Text style={styles.addButtonText}>Tambah Data</Text>
-            </TouchableOpacity>
+            <View style={styles.content}>
+                <TouchableOpacity style={styles.addButton} onPress={() => {
+                    setIsModalVisible(true)}}>
+                    <Text style={styles.addButtonText}>Tambah Data</Text>
+                </TouchableOpacity>
 
-            <View style={styles.tableHeader}>
-                <Text style={styles.headerText}>Name</Text>
-                <Text style={styles.headerText}>Address</Text>
-                <Text style={styles.headerText}>Phone</Text>
-                <Text style={styles.headerText}>Action</Text>
+                <View style={styles.searchSortContainer}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder='Cari nama, alamat, atau no telepon'
+                        value={searchTerms}
+                        onChangeText={setSearchTerms}
+                    />
+                    <TouchableOpacity style={styles.searchButton} onPress={() => {setIsSortModalVisible(true)}}>
+                        <Icon name="funnel" size={20} color="#F79300" />
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.tableHeader}>
+                    <Text style={styles.headerText}>Name</Text>
+                    <Text style={styles.headerText}>Address</Text>
+                    <Text style={styles.headerText}>Phone</Text>
+                    <Text style={styles.headerText}>Action</Text>
+                </View>
+
+                <FlatList
+                    data={filterDistributors}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.employeeRow}>
+                            <Text style={styles.employeeText}>{item.name}</Text>
+                            <Text style={styles.employeeText}>{item.address}</Text>
+                            <Text style={styles.employeeText}>{item.phone}</Text>
+                            <View style={{ flexDirection: 'row' }}>
+                                <TouchableOpacity onPress={() => handleEditDataModal(item)} style={styles.editButton}>
+                                    <Icon name="create" size={20} color="#F79300" />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => handleDeleteData(item.id)} style={styles.editButton}>
+                                    <Icon name="trash" size={20} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    contentContainerStyle={{ paddingBottom: 10 }}
+                    ListEmptyComponent={() => (
+                        <View style={{ padding: 20, alignItems: 'center' }}>
+                            <Text style={{ color: '#999' }}>Tidak ada data distributor ditemukan.</Text>
+                        </View>
+                    )}
+                    style={{  flex: 1 }}
+                />
             </View>
+        
 
-            <FlatList
-                data={distributors}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.employeeRow}>
-                        <Text style={styles.employeeText}>{item.name}</Text>
-                        <Text style={styles.employeeText}>{item.address}</Text>
-                        <Text style={styles.employeeText}>{item.phone}</Text>
-                        <TouchableOpacity onPress={() => handleEditDataModal(item)} style={styles.editButton}>
-                            <Icon name="create" size={20} color="#F79300" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDeleteData(item.id)} style={styles.deleteButton}>
-                            <Icon name="trash" size={20} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => {
-                    resetForm();
-                    setModalVisible(false)}}
-            >
-                <TouchableOpacity style={styles.modalOverlay} onPressOut={() => {
-                    resetForm();
-                    setModalVisible(false)}}>
-                    <TouchableOpacity style={styles.modalContent} onPress={() => {}}>
-                        <Text style={styles.modalTitle}>{editMode ? 'Edit Data' : 'Tambah Data'}</Text>
+            <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+                <TouchableOpacity style={styles.modalCountainer} onPress={() => setIsModalVisible(false)}>
+                    <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+                        <Text style={styles.modalTitle}>Tambah Data</Text>
                         <TextInput
                             placeholder="Nama Distributor"
                             style={styles.input}
-                            value={name}
-                            onChangeText={setName}
+                            value={itemName}
+                            onChangeText={setItemName}
                         />
                         <TextInput
                             placeholder="Alamat"
@@ -164,20 +202,84 @@ const Distributor = () => {
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
                         />
-                        <TouchableOpacity style={styles.modalButton} onPress={editMode ? handleEditData : handleAddData}>
-                            <Text style={styles.modalButtonText}>{editMode ? 'Simpan Perubahan' : 'Tambah Data'}</Text>
+                        <TouchableOpacity style={styles.submitButton} onPress={handleAddData}>
+                            <Text style={styles.submitButtonText}>Tambah Data</Text>
                         </TouchableOpacity>
-                    </TouchableOpacity>
+                    </View>
                 </TouchableOpacity>
             </Modal>
 
-            <Modal animationType="fade" transparent={true} visible={successVisible}>
+            <Modal visible={isEditModalVisible} animationType="slide" transparent={true}>
+                <TouchableOpacity style={styles.modalCountainer} onPress={() => {setIsEditModalVisible(false); resetForm();}}>
+                    <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+                        <Text style={styles.modalTitle}>Edit Data</Text>
+                        <TextInput
+                            placeholder="Nama Distributor"
+                            style={styles.input}
+                            value={itemName}
+                            onChangeText={setItemName}
+                        />
+                        <TextInput
+                            placeholder="Alamat"
+                            style={styles.input}
+                            value={address}
+                            onChangeText={setAddress}
+                        />
+                        <TextInput
+                            placeholder="No Telepon"
+                            style={styles.input}
+                            value={phone}
+                            onChangeText={setPhone}
+                            keyboardType="phone-pad"
+                        />
+                        <TouchableOpacity style={styles.submitButton} onPress={handleEditData}>
+                            <Text style={styles.submitButtonText}>Simpan Perubahan</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            <Modal visible={isSuccessVisible} transparent={true} animationType="fade">
                 <View style={styles.successContainer}>
                     <View style={styles.successContent}>
-                        <Icon name="checkmark-circle" size={32} color="green" />
-                        <Text style={styles.successText}>{editMode ? 'Berhasil Diubah!' : 'Berhasil Ditambahkan!'}</Text>
+                        <Icon name="checkmark-circle" size={50} color="green" />
+                        <Text style={styles.successText}>Data berhasil disimpan!</Text>
                     </View>
                 </View>
+            </Modal>
+
+            <Modal visible={isSortModalVisible} transparent={true} animationType="slide" onRequestClose={() => setIsSortModalVisible(false)}>
+                <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setIsSortModalVisible(false)}>
+                    <TouchableOpacity activeOpacity={1} style={styles.bottomSheet} onPress={() => {}}>
+                        <View style={styles.sortHeader}>
+                            <Text style={styles.sortTitle}>Urutkan Berdasarkan</Text>
+                            <TouchableOpacity onPress={() => setIsSortModalVisible(false)} style={styles.closeButton}>
+                                <Icon name="close" size={24} color="#000" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {[
+                            { label: 'Terbaru', value: 'latest' },
+                            { label: 'Terlama', value: 'oldest' },
+                            { label: 'A-Z', value: 'az' },
+                            { label: 'Z-A', value: 'za' }
+                        ].map((option) => (
+                            <TouchableOpacity
+                                key={option.value}
+                                style={styles.sortOption}
+                                onPress={() => {
+                                    setSortOption(option.value);
+                                    setIsSortModalVisible(false);
+                                }}
+                            >
+                                <View style={styles.radioCircle}>
+                                    {sortOption === option.value && <View style={styles.selectedRb} />}
+                                </View>
+                                <Text style={styles.sortOptionText}>{option.label}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </TouchableOpacity>
+                </TouchableOpacity>
             </Modal>
         </View>
     );
@@ -205,11 +307,10 @@ const styles = StyleSheet.create({
     },
     tableHeader: {
         flexDirection: 'row',
-        padding: 10,
+        padding: 8,
         backgroundColor: '#e0e0e0',
-        borderTopLeftRadius: 5,
-        borderTopRightRadius: 5,
-        marginHorizontal: 16,
+        borderRadius: 4,
+        justifyContent: 'space-between',
     },
     headerText: {
         flex: 1,
@@ -220,11 +321,10 @@ const styles = StyleSheet.create({
     },    
     addButton: {
         backgroundColor: '#F79300',
-        padding: 10,
+        padding: 12,
         borderRadius: 5,
         alignItems: 'center',
-        marginVertical: 10,
-        marginHorizontal: 16,
+        marginBottom: 16,
     },
     addButtonText: {
         color: 'white',
@@ -232,51 +332,43 @@ const styles = StyleSheet.create({
     },
     employeeRow: {
         flexDirection: 'row',
-        padding: 10,
-        backgroundColor: 'white',
-        marginBottom: 5,
-        borderRadius: 5,
-        marginHorizontal: 16,
+        padding: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        justifyContent: 'center',
     },
     employeeText: {
         flex: 1,
-        fontSize: 14,
+        textAlign: 'center',
     },
     editButton: {
-        padding: 5,
-        marginLeft: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 8,
     },
     deleteButton: {
         padding: 5,
         marginLeft: 10,
     },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     modalContent: {
-        width: '80%',
+        width: 300,
         backgroundColor: 'white',
         padding: 20,
-        borderRadius: 10,
-        alignItems: 'center',
+        borderRadius: 8,
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 16,
+        textAlign: 'center',
     },
     input: {
-        width: '100%',
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
-        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        marginBottom: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
     },
     modalButton: {
         backgroundColor: '#F79300',
@@ -306,6 +398,105 @@ const styles = StyleSheet.create({
         color: 'green',
         fontWeight: 'bold',
         marginTop: 10,
+    },
+    content: {
+        flex: 1,
+        padding: 16,
+    },
+    searchSortContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    searchInput: {
+        flex: 1,
+        paddingHorizontal: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        height: 44,
+    },
+    searchButton: {
+        marginLeft: 10,
+        padding: 10,
+        width: 44,
+        height: 44,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalCountainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    submitButton: {
+        backgroundColor: '#F79300',
+        padding: 12,
+        borderRadius: 4,
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    submitButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+    },
+    bottomSheet: {
+        backgroundColor: 'white',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        maxHeight: '50%',
+        paddingTop: 30,
+        paddingBottom: 20,
+        paddingHorizontal: 24,
+    },
+    sortHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    sortTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    closeButton: {
+        padding: 8,
+    },
+    sortOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+    },
+    radioCircle: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#F79300',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    selectedRb: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#F79300',
+    },
+    sortOptionText: {
+        fontSize: 16,
+        color: '#333',
     },
 });
 

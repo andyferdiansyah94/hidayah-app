@@ -338,13 +338,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#e0e0e0',
-    padding: 8,
-    borderRadius: 4,
-    justifyContent: 'space-between',
-  },
   tableHeaderText: {
     fontWeight: 'bold',
     flex: 1,
@@ -389,6 +382,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 16,
   },
   successContainer: {
     flex: 1,
@@ -464,9 +458,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  submitButtonText: {
-    fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
