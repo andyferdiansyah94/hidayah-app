@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: '500',
   },
   content: {
