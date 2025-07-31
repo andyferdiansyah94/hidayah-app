@@ -108,6 +108,12 @@ const Barang = () => {
     setRefreshing(false);
   };
 
+  const formatRupiah = (angka) => {
+    if (!angka) return 'Rp 0';
+    return 'Rp ' + parseFloat(angka)
+      .toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -133,28 +139,21 @@ const Barang = () => {
             <Icon name="funnel" size={20} color="#F79300" />
           </TouchableOpacity>
         </View>
-    
-        <View style={styles.tableHeader}>
-          <Text style={styles.tableHeaderText}>Name</Text>
-          <Text style={styles.tableHeaderText}>Quantity</Text>
-          <Text style={styles.tableHeaderText}>Price</Text>
-          <Text style={styles.tableHeaderText}>Category</Text>
-          <Text style={styles.tableHeaderText}>Action</Text>
-        </View>
 
         <FlatList
           data={filteredData}
           keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
-            <View style={styles.tableRow}>
-              <Text style={styles.tableCell}>{item.name}</Text>
-              <Text style={styles.tableCell}>{item.quantity}</Text>
-              <Text style={styles.tableCell}>{item.price}</Text>
-              <Text style={styles.tableCell}>{item.category}</Text>
-              <View style={{ flexDirection: 'row' }}>
+            <View style={styles.card}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemPrice}>{formatRupiah(item.price)}</Text>
+              </View>
+
+              <View style={styles.actionCountainer}>
                 <TouchableOpacity
-                  style={styles.editButton}
+                  style={styles.actionButton}
                   onPress={() => {
                     setEditItem(item);
                     setItemName(item.name);
@@ -166,7 +165,10 @@ const Barang = () => {
                 >
                   <Icon name="create" size={24} color="#F79300" />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.editButton} onPress={() => handleDeleteData(item.id)}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => handleDeleteData(item.id)}
+                >
                   <Icon name="trash" size={24} color="red" />
                 </TouchableOpacity>
               </View>
@@ -320,7 +322,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: '500',
   },
   content: {
@@ -514,6 +516,40 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    width: '100%',
+    height: 100,
+    padding: 16,
+    marginBottom: 16,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    alignItems: 'center',
+  },
+  itemName: {
+    fontSize: 18,
+    marginLeft: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  itemPrice: {
+    fontSize: 16,
+    marginLeft: 16,
+    color: '#F79300',
+    marginTop: 4,
+  },
+  actionCountainer: {
+    flexDirection: 'row',
+    marginLeft: 10,
+  },
+  actionButton: {
+    marginHorizontal: 5,
   },
 });
 

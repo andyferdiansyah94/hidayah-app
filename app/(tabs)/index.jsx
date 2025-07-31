@@ -81,7 +81,7 @@ const Home = () => {
       <SafeAreaView style={styles.loadingContainer}>
         <StatusBar barStyle="dark-content" />
         <LottieView
-          source={require('../../assets/lottie/loader.json')}  // <— sesuaikan path ke animasi kamu
+          source={require('../../assets/lottie/loader.json')} 
           autoPlay
           loop
           style={styles.loader}
