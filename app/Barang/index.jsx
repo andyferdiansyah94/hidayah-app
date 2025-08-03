@@ -175,7 +175,7 @@ const Barang = () => {
                     setVisibleMenu(null);
                   }}
                   title="Detail Barang"
-                  leadingIcon={() => <Icon name="eye" size={20} color="#000" />}
+                  leadingIcon={() => <Icon name="eye" size={20} color="#F79300" />}
                 />
                 <Menu.Item
                   onPress={() => {
@@ -188,7 +188,7 @@ const Barang = () => {
                     setVisibleMenu(null);
                   }}
                   title="Edit Barang"
-                  leadingIcon={() => <Icon name="create" size={20} color="#000" />}
+                  leadingIcon={() => <Icon name="create" size={20} color="#F79300" />}
                 /> 
                 <Menu.Item
                   onPress={() => {
@@ -322,10 +322,10 @@ const Barang = () => {
               <Text style={styles.modalTitle}>Detail Barang</Text>
               {selectedItem ? (
                 <>
-                  <Text>Nama Barang: {selectedItem.name}</Text>
-                  <Text>Kuantitas: {selectedItem.quantity}</Text>
-                  <Text>Harga: {formatRupiah(selectedItem.price)}</Text>
-                  <Text>Kategori: {selectedItem.category}</Text>
+                  <Text style={styles.input}>Nama Barang: {selectedItem.name}</Text>
+                  <Text style={styles.input}>Kuantitas: {selectedItem.quantity}</Text>
+                  <Text style={styles.input}>Harga: {formatRupiah(selectedItem.price)}</Text>
+                  <Text style={styles.input}>Kategori: {selectedItem.category}</Text>
                 </>
               ) : (
                 <Text>Tidak ada detail yang tersedia</Text>

@@ -3,12 +3,14 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet, TextInput, FlatList } 
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import { Menu, IconButton } from 'react-native-paper';
 import { set, sub } from 'react-native-reanimated';
 
 const Distributor = () => {
     const navigation = useNavigation();
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
     const [editItem, setEditItem] = useState(null);
     const [selectedItem, setSelectedItem] = useState(null); 
     const [itemName, setItemName] = useState('');
@@ -19,6 +21,7 @@ const Distributor = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [searchTerms, setSearchTerms] = useState('');
     const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+    const [visibleMenu, setVisibleMenu] = useState(null);
     const [sortOption, setSortOption] = useState('latest'); // Default sort by latest
 
     // Fetching distributors data from API
@@ -140,31 +143,71 @@ const Distributor = () => {
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.tableHeader}>
-                    <Text style={styles.headerText}>Name</Text>
-                    <Text style={styles.headerText}>Address</Text>
-                    <Text style={styles.headerText}>Phone</Text>
-                    <Text style={styles.headerText}>Action</Text>
-                </View>
-
                 <FlatList
                     data={filterDistributors}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
-                        <View style={styles.employeeRow}>
-                            <Text style={styles.employeeText}>{item.name}</Text>
-                            <Text style={styles.employeeText}>{item.address}</Text>
-                            <Text style={styles.employeeText}>{item.phone}</Text>
-                            <View style={{ flexDirection: 'row' }}>
-                                <TouchableOpacity onPress={() => handleEditDataModal(item)} style={styles.editButton}>
-                                    <Icon name="create" size={20} color="#F79300" />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => handleDeleteData(item.id)} style={styles.editButton}>
-                                    <Icon name="trash" size={20} color="red" />
-                                </TouchableOpacity>
+                        <View style={styles.card}>
+                            <View style={{ flex:1 }}>
+                                <Text style={styles.employeeText}>{item.name}</Text>
                             </View>
+
+                            <Menu
+                                visible={visibleMenu === item.id}
+                                onDismiss={() => setVisibleMenu(null)}
+                                anchor={
+                                    <IconButton
+                                        icon="dots-vertical"
+                                        size={24}
+                                        onPress={() => setVisibleMenu(visibleMenu === item.id ? null : item.id)}
+                                        color="#000"
+                                    />
+                                }
+                            >
+                                <Menu.Item
+                                    onPress={() => {
+                                        setSelectedItem(item);
+                                        setIsDetailModalVisible(true);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Detail Distributor"
+                                    leadingIcon={() => <Icon name="eye" size={20} color="#F79300" />}
+                                />
+                                <Menu.Item
+                                    onPress={() => {
+                                        handleEditDataModal(item);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Edit Distributor"
+                                    leadingIcon={() => <Icon name="create" size={20} color="#F79300" />}
+                                />
+                                <Menu.Item
+                                    onPress={() => {
+                                        handleDeleteData(item.id);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Hapus Distributor"
+                                    leadingIcon={() => <Icon name="trash" size={20} color="red" />}
+                                />
+                            </Menu>
                         </View>
+
+
+
+                        // <View style={styles.employeeRow}>
+                        //     <Text style={styles.employeeText}>{item.name}</Text>
+                        //     <Text style={styles.employeeText}>{item.address}</Text>
+                        //     <Text style={styles.employeeText}>{item.phone}</Text>
+                        //     <View style={{ flexDirection: 'row' }}>
+                        //         <TouchableOpacity onPress={() => handleEditDataModal(item)} style={styles.editButton}>
+                        //             <Icon name="create" size={20} color="#F79300" />
+                        //         </TouchableOpacity>
+                        //         <TouchableOpacity onPress={() => handleDeleteData(item.id)} style={styles.editButton}>
+                        //             <Icon name="trash" size={20} color="red" />
+                        //         </TouchableOpacity>
+                        //     </View>
+                        // </View>
                     )}
                     refreshing={refreshing}
                     onRefresh={handleRefresh}
@@ -234,6 +277,26 @@ const Distributor = () => {
                         />
                         <TouchableOpacity style={styles.submitButton} onPress={handleEditData}>
                             <Text style={styles.submitButtonText}>Simpan Perubahan</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            <Modal visible={isDetailModalVisible} animationType="slide" transparent={true}>
+                <TouchableOpacity style={styles.modalCountainer} onPress={() => setIsDetailModalVisible(false)}>
+                    <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+                        <Text style={styles.modalTitle}>Detail Distributor</Text>
+                        {selectedItem ? (
+                            <>
+                                <Text style={styles.input}>Nama: {selectedItem.name}</Text>
+                                <Text style={styles.input}>Alamat: {selectedItem.address}</Text>
+                                <Text style={styles.input}>No Telepon: {selectedItem.phone}</Text>
+                            </>
+                        ) : (
+                            <Text style={styles.input}>Tidak ada data yang dipilih.</Text>
+                        )}
+                        <TouchableOpacity style={styles.submitButton} onPress={() => setIsDetailModalVisible(false)}>
+                            <Text style={styles.submitButtonText}>Tutup</Text>
                         </TouchableOpacity>
                     </View>
                 </TouchableOpacity>
@@ -339,8 +402,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     employeeText: {
-        flex: 1,
-        textAlign: 'center',
+        fontSize: 18,
+        marginLeft: 16,
+        fontWeight: 'bold',
+        color: '#333',
     },
     editButton: {
         justifyContent: 'center',
@@ -497,6 +562,21 @@ const styles = StyleSheet.create({
     sortOptionText: {
         fontSize: 16,
         color: '#333',
+    },
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        width: '100%',
+        height: 100,
+        padding: 16,
+        marginBottom: 16,
+        borderRadius: 8,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        alignItems: 'center',
     },
 });
 
