@@ -192,22 +192,6 @@ const Distributor = () => {
                                 />
                             </Menu>
                         </View>
-
-
-
-                        // <View style={styles.employeeRow}>
-                        //     <Text style={styles.employeeText}>{item.name}</Text>
-                        //     <Text style={styles.employeeText}>{item.address}</Text>
-                        //     <Text style={styles.employeeText}>{item.phone}</Text>
-                        //     <View style={{ flexDirection: 'row' }}>
-                        //         <TouchableOpacity onPress={() => handleEditDataModal(item)} style={styles.editButton}>
-                        //             <Icon name="create" size={20} color="#F79300" />
-                        //         </TouchableOpacity>
-                        //         <TouchableOpacity onPress={() => handleDeleteData(item.id)} style={styles.editButton}>
-                        //             <Icon name="trash" size={20} color="red" />
-                        //         </TouchableOpacity>
-                        //     </View>
-                        // </View>
                     )}
                     refreshing={refreshing}
                     onRefresh={handleRefresh}

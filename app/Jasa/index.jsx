@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useNavigation } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -12,85 +13,158 @@ import {
     TouchableWithoutFeedback,
     Keyboard,
 } from 'react-native';
+import { IconButton, Menu } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Ionicons';
+
+const API_URL = 'http://10.0.2.2:8000/api/jasa';
+const CATEGORY_API_URL = 'http://10.0.2.2:8000/api/kategori';
+
 
 const Jasa = () => {
     const navigation = useNavigation();
-    const API_URL = 'http://10.0.2.2:8000/api/jasa';
-
     const [data, setData] = useState([]);
     const [isAddModalVisible, setAddModalVisible] = useState(false);
-    const [isEditModalVisible, setEditModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [formData, setFormData] = useState({ id: '', name: '', price: '', category: 'Jasa' });
+    const [itemName, setItemName] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [price, setPrice] = useState('');
+    const [category, setCategory] = useState('');
+    const [editItem, setEditItem] = useState(null);
+    const [isSuccessVisible, setIsSuccessVisible] = useState(false);
+    const [sortOption, setSortOption] = useState('latest');
+    const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+    const [visibleMenu, setVisibleMenu] = useState(null);
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+
 
     const fetchData = async () => {
         try {
-            const response = await fetch(API_URL);
-            const result = await response.json();
-            setData(result.data);
+            const response = await axios.get(API_URL, {
+                params: {
+                search: searchTerm,
+                sort: sortOption,
+                },
+            });
+            setData(response.data.data);
         } catch (error) {
-            Alert.alert('Error', 'Failed to fetch data from API');
+            console.error('Error fetching data:', error);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get(CATEGORY_API_URL);
+            setCategories(response.data.data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
         }
     };
 
     useEffect(() => {
         fetchData();
-    }, []);
+        fetchCategories();
+    }, [searchTerm, sortOption]);
 
-    const handleSaveData = async () => {
-        if (formData.name && formData.price) {
-            try {
-                const method = isEditModalVisible ? 'PUT' : 'POST';
-                const url = isEditModalVisible ? `${API_URL}/${formData.id}` : API_URL;
+    // const handleSaveData = async () => {
+    //     if (formData.name && formData.price) {
+    //         try {
+    //             const method = isEditModalVisible ? 'PUT' : 'POST';
+    //             const url = isEditModalVisible ? `${API_URL}/${formData.id}` : API_URL;
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        name: formData.name,
-                        price: formData.price,
-                        category: formData.category,
-                    }),
-                });
+    //             const response = await fetch(url, {
+    //                 method: method,
+    //                 headers: {
+    //                     'Content-Type': 'application/json',
+    //                 },
+    //                 body: JSON.stringify({
+    //                     name: formData.name,
+    //                     price: formData.price,
+    //                     category: formData.category,
+    //                 }),
+    //             });
 
-                if (response.ok) {
-                    Alert.alert('Success', isEditModalVisible ? 'Data updated successfully' : 'Data added successfully');
-                    fetchData();
-                    setFormData({ id: '', name: '', price: '', category: 'Jasa' });
-                    setAddModalVisible(false);
-                    setEditModalVisible(false);
-                } else {
-                    const errorData = await response.json();
-                    Alert.alert('Error', errorData.message || 'Failed to save data');
-                }
-            } catch (error) {
-                Alert.alert('Error', 'Failed to save data');
-            }
-        } else {
-            Alert.alert('Error', 'Please fill in all fields');
+    //             if (response.ok) {
+    //                 Alert.alert('Success', isEditModalVisible ? 'Data updated successfully' : 'Data added successfully');
+    //                 fetchData();
+    //                 setFormData({ id: '', name: '', price: '', category: 'Jasa' });
+    //                 setAddModalVisible(false);
+    //                 setIsEditModalVisible(false);
+    //             } else {
+    //                 const errorData = await response.json();
+    //                 Alert.alert('Error', errorData.message || 'Failed to save data');
+    //             }
+    //         } catch (error) {
+    //             Alert.alert('Error', 'Failed to save data');
+    //         }
+    //     } else {
+    //         Alert.alert('Error', 'Please fill in all fields');
+    //     }
+    // };
+
+    const handleAddData = async () => {
+        try {
+            const newItem = { name: itemName, price: price, category: category };
+            const response = await axios.post(API_URL, newItem);
+            setData([response.data, ...data]);
+            setIsEditModalVisible(false);
+            setIsSuccessVisible(true);
+            resetForm();
+        } catch (error) {
+            Alert.alert('Error', 'Gagal untuk menambahkan data');
         }
     };
 
-    const handleEditData = (item) => {
-        setFormData(item);
-        setEditModalVisible(true);
+    const handleEditData = async () => {
+        try {
+            const updatedItem = { name: itemName, price: price, category: category };
+            await axios.put(`${API_URL}/${editItem.id}`, updatedItem);
+            setData(data.map(item => (item.id === editItem.id ? { ...item, ...updatedItem } : item)));
+            setIsEditModalVisible(false);
+            setIsSuccessVisible(true);
+            resetForm();
+        } catch (error) {
+            Alert.alert('Error', 'Gagal untuk mengedit data');
+        }
     };
 
     const handleDeleteData = async (id) => {
         try {
-            const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-            if (response.ok) {
-                Alert.alert('Success', 'Data deleted successfully');
-                fetchData();
-            } else {
-                const errorData = await response.json();
-                Alert.alert('Error', errorData.message || 'Failed to delete data');
-            }
+            await axios.delete(`${API_URL}/${id}`);
+            setData(data.filter(item => item.id !== id));
+            Alert.alert('Success', 'Data deleted successfully');
         } catch (error) {
-            Alert.alert('Error', 'Failed to delete data');
+            console.error('Error deleting data:', error);
         }
+    };
+
+    const resetForm = () => {
+        setItemName('');
+        setPrice('');
+        setCategory('');
+        setEditItem(null);
+    };
+
+    const filteredData = data.filter(item =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
+    };
+
+    const formatRupiah = (angka) => {
+        if (!angka) return 'Rp 0';
+        return 'Rp ' + parseFloat(angka).toLocaleString('id-ID', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
     };
 
     return (
@@ -101,91 +175,144 @@ const Jasa = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Data Jasa</Text>
             </View>
+            
+            <View style={styles.content}>
+                <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
+                    <Text style={styles.addButtonText}>Tambah Data</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity style={styles.addButton} onPress={() => setAddModalVisible(true)}>
-                <Text style={styles.addButtonText}>Tambah Data</Text>
-            </TouchableOpacity>
+                <View style={styles.searchSortContainer}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Cari Nama Jasa..."
+                        value={searchTerm}
+                        onChangeText={setSearchTerm}
+                    />
+                    <TouchableOpacity onPress={() => setIsSortModalVisible(true)} style={styles.filterButton}>
+                        <Icon name="funnel" size={20} color="#F79300" />
+                    </TouchableOpacity>
+                </View>
 
-            <FlatList
-                data={data}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.tableRow}>
-                        <Text style={styles.tableCell}>{item.name}</Text>
-                        <Text style={styles.tableCell}>{item.price}</Text>
-                        <Text style={styles.tableCell}>{item.category}</Text>
-                        <TouchableOpacity onPress={() => handleEditData(item)}>
-                            <Icon name="create" size={20} color="#F79300" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDeleteData(item.id)}>
-                            <Icon name="trash" size={20} color="#e63946" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-                ListHeaderComponent={() => (
-                    <View style={styles.tableHeader}>
-                        <Text style={styles.tableCell}>Nama</Text>
-                        <Text style={styles.tableCell}>Price</Text>
-                        <Text style={styles.tableCell}>Kategori</Text>
-                        <Text style={styles.tableCell}>Action</Text>
-                    </View>
-                )}
-            />
+                <FlatList
+                    data={filteredData}
+                    keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) => (
+                        <View style={styles.card}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.itemName}>{item.name}</Text>
+                                <Text style={styles.itemPrice}>{formatRupiah(item.price)}</Text>
+                            </View>
+
+                            <Menu
+                                visible={selectedItem === item.id}
+                                onDismiss={() => setVisibleMenu(null)}
+                                anchor={
+                                    <IconButton
+                                        icon="dots-vertical"
+                                        size={24}
+                                        onPress={() => setVisibleMenu(visibleMenu === item.id ? null : item.id)}
+                                        color="#000"
+                                    />
+                                }
+                            >
+                                <Menu.Item 
+                                    onPress={() => {
+                                        setSelectedItem(item);
+                                        setIsDetailModalVisible(true);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Detail Jasa"
+                                    leadingIcon={() => <Icon name='eye' size={20} color="#F79300"/>}
+                                />
+                                <Menu.Item
+                                    onPress={() => {
+                                        setEditItem(item);
+                                        setItemName(item.name);
+                                        setPrice(item.price);
+                                        setCategory(item.category);
+                                        setIsEditModalVisible(true);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Edit Jasa"
+                                    leadingIcon={() => <Icon name='create' size={20} color={"#F79300"} />}
+                                />
+                                <Menu.Item
+                                    onPress={() => {
+                                        handleDeleteData(item.id);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Hapus Jasa"
+                                    leadingIcon={() => <Icon name='trash' size={20} color="red" />}
+                                />
+                            </Menu>
+                        </View>
+                    )}
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    contentContainerStyle={{ paddingBottom: 10 }}
+                    ListEmptyComponent={() => (
+                        <View style={styles.emptyComponent}>
+                            <Text style={{ color: "#888" }}>Tidak ada data yang ditemukan</Text>
+                        </View>
+                    )}
+                    style={{ flex: 1 }}
+                />
 
 
-        <Modal
-            visible={isAddModalVisible || isEditModalVisible}
-            transparent
-            animationType="slide"
-            onRequestClose={() => {
-                setAddModalVisible(false);
-                setEditModalVisible(false);
-                setFormData({ id: '', name: '', price: '', category: 'Jasa' });
-            }}
-        >
-            <TouchableWithoutFeedback
-                onPress={() => {
-                    setAddModalVisible(false);
-                    setEditModalVisible(false);
-                    Keyboard.dismiss();
-                }}
-            >
-                <View style={styles.modalContainer}>
-                    <TouchableWithoutFeedback onPress={() => {}}>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.modalTitle}>
-                                {isEditModalVisible ? 'Edit Data' : 'Tambah Data'}
-                            </Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Nama Jasa"
-                                value={formData.name}
-                                onChangeText={(text) => setFormData({ ...formData, name: text })}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Harga"
-                                keyboardType="numeric"
-                                value={formData.price}
-                                onChangeText={(text) => setFormData({ ...formData, price: text })}
-                            />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Kategori"
-                                value={formData.category}
-                                onChangeText={(text) => setFormData({ ...formData, category: text })}
-                            />
-                            <TouchableOpacity style={styles.addButton} onPress={handleSaveData}>
-                                <Text style={styles.addButtonText}>
-                                    {isEditModalVisible ? 'Simpan Perubahan' : 'Tambah Data'}
-                                </Text>
-                            </TouchableOpacity>
+                <Modal
+                    visible={isAddModalVisible || isEditModalVisible}
+                    transparent
+                    animationType="slide"
+                    onRequestClose={() => {
+                        setAddModalVisible(false);
+                        setEditModalVisible(false);
+                        setFormData({ id: '', name: '', price: '', category: 'Jasa' });
+                    }}
+                >
+                    <TouchableWithoutFeedback
+                        onPress={() => {
+                            setAddModalVisible(false);
+                            setEditModalVisible(false);
+                            Keyboard.dismiss();
+                        }}
+                    >
+                        <View style={styles.modalContainer}>
+                            <TouchableWithoutFeedback onPress={() => {}}>
+                                <View style={styles.modalContent}>
+                                    <Text style={styles.modalTitle}>
+                                        {isEditModalVisible ? 'Edit Data' : 'Tambah Data'}
+                                    </Text>
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Nama Jasa"
+                                        value={formData.name}
+                                        onChangeText={(text) => setFormData({ ...formData, name: text })}
+                                    />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Harga"
+                                        keyboardType="numeric"
+                                        value={formData.price}
+                                        onChangeText={(text) => setFormData({ ...formData, price: text })}
+                                    />
+                                    <TextInput
+                                        style={styles.input}
+                                        placeholder="Kategori"
+                                        value={formData.category}
+                                        onChangeText={(text) => setFormData({ ...formData, category: text })}
+                                    />
+                                    <TouchableOpacity style={styles.addButton} onPress={handleAddData}>
+                                        <Text style={styles.addButtonText}>
+                                            {isEditModalVisible ? 'Simpan Perubahan' : 'Tambah Data'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </TouchableWithoutFeedback>
                         </View>
                     </TouchableWithoutFeedback>
-                </View>
-            </TouchableWithoutFeedback>
-        </Modal>
-
+                </Modal>
+            </View>
         </View>
     );
 };
@@ -214,12 +341,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#F79300',
         padding: 12,
         borderRadius: 5,
-        margin: 16,
+        marginBottom: 16,
         alignItems: 'center',
     },
     addButtonText: {
         color: '#FFF',
-        fontWeight: '600',
+        fontWeight: 'bold',
     },
     tableHeader: {
         marginLeft: 20,
@@ -284,6 +411,49 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: 'green',
         marginTop: 10,
+    },
+    content: {
+        padding: 16,
+        flex: 1,
+    },
+    searchSortContainer: {
+        flexDirection: "row",
+        marginBottom: 15,
+        alignItems: "center",
+    },
+    searchInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        height: 44,
+    },
+    filterButton: {
+        marginLeft: 10,
+        padding: 10,
+        width: 44,
+        height: 44,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        borderRadius: 8,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    card: {
+        flexDirection: "row",
+        backgroundColor: "#fff",
+        width: "100%",
+        height: 100,
+        padding: 16,
+        marginBottom: 16,
+        borderRadius: 8,
+        elevation: 2,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        alignItems: "center",
     },
 });
 

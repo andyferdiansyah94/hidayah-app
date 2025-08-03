@@ -199,28 +199,6 @@ const Barang = () => {
                   leadingIcon={() => <Icon name="trash" size={20} color="red" />}
                 />
               </Menu>
-
-              {/* <View style={styles.actionCountainer}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => {
-                    setEditItem(item);
-                    setItemName(item.name);
-                    setQuantity(item.quantity.toString());
-                    setPrice(item.price);
-                    setCategory(item.category);
-                    setIsEditModalVisible(true);
-                  }}
-                >
-                  <Icon name="create" size={24} color="#F79300" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleDeleteData(item.id)}
-                >
-                  <Icon name="trash" size={24} color="red" />
-                </TouchableOpacity>
-              </View> */}
             </View>
           )}
           refreshing={refreshing}
