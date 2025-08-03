@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { useNavigation } from 'expo-router';
+import { Menu, IconButton } from 'react-native-paper';
+import { set } from 'react-native-reanimated';
 
 const API_URL = 'http://10.0.2.2:8000/api/barang';
 const CATEGORY_API_URL = 'http://10.0.2.2:8000/api/kategori';
@@ -24,6 +26,9 @@ const Barang = () => {
   const [isSortModalVisible, setIsSortModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isSuccessVisible, setIsSuccessVisible] = useState(false);
+  const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [visibleMenu, setVisibleMenu] = useState(null);
   
 
   const fetchData = async () => {
@@ -151,7 +156,51 @@ const Barang = () => {
                 <Text style={styles.itemPrice}>{formatRupiah(item.price)}</Text>
               </View>
 
-              <View style={styles.actionCountainer}>
+              <Menu
+                visible={visibleMenu === item.id}
+                onDismiss={() => setVisibleMenu(null)}
+                anchor={
+                  <IconButton
+                    icon="dots-vertical"
+                    size={24}
+                    onPress={() => setVisibleMenu(visibleMenu === item.id ? null : item.id)}
+                    color="#000"
+                  />
+                }
+              >
+                <Menu.Item
+                  onPress={() => {
+                    setSelectedItem(item);
+                    setIsDetailModalVisible(true);
+                    setVisibleMenu(null);
+                  }}
+                  title="Detail Barang"
+                  leadingIcon={() => <Icon name="eye" size={20} color="#000" />}
+                />
+                <Menu.Item
+                  onPress={() => {
+                    setEditItem(item);
+                    setItemName(item.name);
+                    setQuantity(item.quantity.toString());
+                    setPrice(item.price);
+                    setCategory(item.category);
+                    setIsEditModalVisible(true);
+                    setVisibleMenu(null);
+                  }}
+                  title="Edit Barang"
+                  leadingIcon={() => <Icon name="create" size={20} color="#000" />}
+                /> 
+                <Menu.Item
+                  onPress={() => {
+                    handleDeleteData(item.id);
+                    setVisibleMenu(null);
+                  }}
+                  title="Hapus Barang"
+                  leadingIcon={() => <Icon name="trash" size={20} color="red" />}
+                />
+              </Menu>
+
+              {/* <View style={styles.actionCountainer}>
                 <TouchableOpacity
                   style={styles.actionButton}
                   onPress={() => {
@@ -171,7 +220,7 @@ const Barang = () => {
                 >
                   <Icon name="trash" size={24} color="red" />
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </View>
           )}
           refreshing={refreshing}
@@ -262,6 +311,27 @@ const Barang = () => {
               </Picker>
               <TouchableOpacity style={styles.submitButton} onPress={handleEditData}>
                 <Text style={styles.submitButtonText}>Simpan Perubahan</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+
+        <Modal visible={isDetailModalVisible} animationType="slide" transparent={true}>
+          <TouchableOpacity style={styles.modalContainer} onPress={() => setIsDetailModalVisible(false)}>
+            <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+              <Text style={styles.modalTitle}>Detail Barang</Text>
+              {selectedItem ? (
+                <>
+                  <Text>Nama Barang: {selectedItem.name}</Text>
+                  <Text>Kuantitas: {selectedItem.quantity}</Text>
+                  <Text>Harga: {formatRupiah(selectedItem.price)}</Text>
+                  <Text>Kategori: {selectedItem.category}</Text>
+                </>
+              ) : (
+                <Text>Tidak ada detail yang tersedia</Text>
+              )}
+              <TouchableOpacity style={styles.submitButton} onPress={() => setIsDetailModalVisible(false)}>
+                <Text style={styles.submitButtonText}>Tutup</Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -550,6 +620,9 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     marginHorizontal: 5,
+  },
+  closeButton: {
+    padding: 8,
   },
 });
 
