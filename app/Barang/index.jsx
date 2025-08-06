@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   },
   searchSortContainer: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginBottom: 16,
     alignItems: 'center',
   },
   filterButton: {

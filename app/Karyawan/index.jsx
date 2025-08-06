@@ -4,41 +4,60 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
+import { use } from 'react';
+import { IconButton, Menu } from 'react-native-paper';
+
+const API_URL = 'http://10.0.2.2:8000/api/employees';
+
 
 const EmployeeData = () => {
     const navigation = useNavigation();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
     const [status, setStatus] = useState('');
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-    const [successVisible, setSuccessVisible] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [isSuccessVisible, setIsSuccessVisible] = useState(false);
     const [employeeData, setEmployeeData] = useState([]);
+    const [itemName, setItemName] = useState('');
+    const [editItem, setEditItem] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortOption, setSortOption] = useState('latest');
+    const [data, setData] = useState([]);
+    const [isSortModalVisible, setIsSortModalVisible] = useState(false);
+    const [visibleMenu, setVisibleMenu] = useState(null);
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
 
-    const apiUrl = 'http://10.0.2.2:8000/api/employees';
 
-    useEffect(() => {
-        fetchEmployees();
-    }, []);
-
-    const fetchEmployees = async () => {
+    const fetchData = async () => {
         try {
-            const response = await axios.get(apiUrl);
-            setEmployeeData(response.data.data);
+        const response = await axios.get(API_URL, {
+            params: {
+                search: searchTerm,
+                sort: sortOption,
+            },
+        });
+        setData(response.data.data);
         } catch (error) {
-            Alert.alert('Error', 'Gagal mengambil data karyawan');
+        console.error('Error fetching data:', error);
         }
     };
 
+    useEffect(() => {
+        fetchData();
+    }, [searchTerm, sortOption]);
+
     const handleAddData = async () => {
         try {
-            await axios.post(apiUrl, { name, phone, address, status });
-            fetchEmployees();
-            setSuccessVisible(true);
-            setModalVisible(false);
-            setTimeout(() => setSuccessVisible(false), 2000);
+            const newItem = { name: itemName, phone: phone, address: address, status: status  };
+            const response = await axios.post(API_URL, newItem);
+            setData([response.data.data, ...data]);
+            setIsSuccessVisible(true);
+            setIsModalVisible(false);
+            resetForm();
         } catch (error) {
             Alert.alert('Error', 'Gagal menambahkan data');
         }
@@ -46,11 +65,12 @@ const EmployeeData = () => {
 
     const handleEditData = async () => {
         try {
-            await axios.put(`${apiUrl}/${selectedEmployee.id}`, { name, phone, address, status });
-            fetchEmployees();
-            setSuccessVisible(true);
-            setEditModalVisible(false);
-            setTimeout(() => setSuccessVisible(false), 2000);
+            const updatedItem = { name: itemName, phone: phone, address: address, status: status };
+            await axios.put(`${API_URL}/${editItem.id}`, updatedItem);
+            setData(data.map(item => (item.id === editItem.id ? { ...item, ...updatedItem } : item)));
+            setIsSuccessVisible(true);
+            setIsEditModalVisible(false);
+            resetForm();
         } catch (error) {
             Alert.alert('Error', 'Gagal mengubah data');
         }
@@ -58,12 +78,30 @@ const EmployeeData = () => {
 
     const handleDeleteData = async (id) => {
         try {
-            await axios.delete(`${apiUrl}/${id}`);
-            fetchEmployees();
-            Alert.alert('Success', 'Data berhasil dihapus');
+            await axios.delete(`${API_URL}/${id}`);
+            setData(data.filter(item => item.id !== id));
+            Alert.alert('Success', 'Data deleted succesfully');
         } catch (error) {
             Alert.alert('Error', 'Gagal menghapus data');
         }
+    };
+
+    const resetForm = () => {
+        setItemName('');
+        setAddress('');
+        setPhone('');
+        setStatus('');
+        setEditItem(null);
+    };
+
+    const filteredData = data.filter(item =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
     };
 
     return (
@@ -74,168 +112,212 @@ const EmployeeData = () => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Data Karyawan</Text>
             </View>
-    
-            <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-                <Text style={styles.addButtonText}>Tambah Data</Text>
-            </TouchableOpacity>
-    
-            <View style={styles.tableHeader}>
-                <Text style={styles.headerText}>Nama</Text>
-                <Text style={styles.headerText}>Telepon</Text>
-                <Text style={styles.headerText}>Alamat</Text>
-                <Text style={styles.headerText}>Status</Text>
-                <Text style={styles.headerText}>Aksi</Text>
-            </View>
-    
-            <FlatList
-                data={employeeData}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.employeeRow}>
-                        <Text style={styles.employeeText}>{item.name}</Text>
-                        <Text style={styles.employeeText}>{item.phone}</Text>
-                        <Text style={styles.employeeText}>{item.address}</Text>
-                        <Text style={styles.employeeText}>{item.status}</Text>
-                        <TouchableOpacity
-                            onPress={() => {
-                                setSelectedEmployee(item);
-                                setName(item.name);
-                                setPhone(item.phone);
-                                setAddress(item.address);
-                                setStatus(item.status);
-                                setEditModalVisible(true);
-                            }}
-                        >
-                            <Icon name="create" size={24} color="#F79300" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDeleteData(item.id)}>
-                            <Icon name="trash" size={24} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
 
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
-                onRequestClose={() => setModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setModalVisible(false)}
-                >
-                    <TouchableOpacity
-                        style={styles.modalContent}
-                        activeOpacity={1}
-                        onPress={() => {}}
-                    >
-                        <Text style={styles.modalTitle}>Tambah Data</Text>
-                        <TextInput
-                            placeholder="Nama Karyawan"
-                            style={styles.input}
-                            value={name}
-                            onChangeText={setName}
-                        />
-                        <TextInput
-                            placeholder="No Telepon"
-                            style={styles.input}
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                        />
-                        <TextInput
-                            placeholder="Alamat"
-                            style={styles.input}
-                            value={address}
-                            onChangeText={setAddress}
-                        />
-                        <View style={styles.dropdownContainer}>
-                            <Picker
-                                selectedValue={status}
-                                onValueChange={(itemValue) => setStatus(itemValue)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Pilih Status" value="" />
-                                <Picker.Item label="PKWT" value="PKWT" />
-                                <Picker.Item label="PKWTT" value="PKWTT" />
-                            </Picker>
-                        </View>
-                        <TouchableOpacity style={styles.modalButton} onPress={handleAddData}>
-                            <Text style={styles.modalButtonText}>Tambah Data</Text>
-                        </TouchableOpacity>
-                    </TouchableOpacity>
+            <View style={styles.content}>
+                <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
+                    <Text style={styles.addButtonText}>Tambah Data</Text>
                 </TouchableOpacity>
-            </Modal>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={editModalVisible}
-                onRequestClose={() => setEditModalVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setEditModalVisible(false)}
-                >
-                    <TouchableOpacity
-                        style={styles.modalContent}
-                        activeOpacity={1}
-                        onPress={() => {}}
-                    >
-                        <Text style={styles.modalTitle}>Edit Data Karyawan</Text>
-                        <TextInput
-                            placeholder="Nama Karyawan"
-                            style={styles.input}
-                            value={name}
-                            onChangeText={setName}
-                        />
-                        <TextInput
-                            placeholder="No Telepon"
-                            style={styles.input}
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                        />
-                        <TextInput
-                            placeholder="Alamat"
-                            style={styles.input}
-                            value={address}
-                            onChangeText={setAddress}
-                        />
-                        <View style={styles.dropdownContainer}>
-                            <Picker
-                                selectedValue={status}
-                                onValueChange={(itemValue) => setStatus(itemValue)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Pilih Status" value="" />
-                                <Picker.Item label="PKWT" value="PKWT" />
-                                <Picker.Item label="PKWTT" value="PKWTT" />
-                            </Picker>
-                        </View>
-                        <TouchableOpacity style={styles.modalButton} onPress={handleEditData}>
-                            <Text style={styles.modalButtonText}>Simpan Perubahan</Text>
-                        </TouchableOpacity>
+        
+                <View style={styles.searchSortContainer}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder='Cari Nama Karyawan...'
+                        value={searchTerm}
+                        onChangeText={setSearchTerm}
+                    />
+                    <TouchableOpacity onPress={() => setIsSortModalVisible(true)} style={styles.filterButton}>
+                        <Icon name='funnel' size={20} color="#F79300" />
                     </TouchableOpacity>
-                </TouchableOpacity>
-            </Modal>
-
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={successVisible}
-                onRequestClose={() => setSuccessVisible(false)}
-            >
-                <View style={styles.successContainer}>
-                    <View style={styles.successContent}>
-                        <Icon name="create" size={32} color="green" />
-                        <Text style={styles.successText}>Berhasil Ditambahkan!</Text>
-                    </View>
                 </View>
-            </Modal>
+        
+                <FlatList
+                    data={filteredData}
+                    keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator = {false}
+                    renderItem={({ item }) => (
+                        <View style={styles.card}>
+                            <View style={{ flex: 1 }}>
+                                <Text style={styles.employeeText}>{item.name}</Text>
+                            </View>
+
+                            <Menu
+                                visible={visibleMenu === item.id}
+                                onDismiss={() => setVisibleMenu(null)}
+                                anchor={
+                                    <IconButton
+                                        icon='dots-vertical'
+                                        size={24}
+                                        onPress={() => setVisibleMenu(visibleMenu === item.id ? null : item.id)}
+                                        color='#000'
+                                    />
+                                }
+                            >
+                                <Menu.Item
+                                    onPress={() => {
+                                        setSelectedItem(item);
+                                        setIsDetailModalVisible(true);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Detail Karyawan"
+                                    leadingIcon={() => <Icon name='eye' size={20} color="#F79300" />}
+                                />
+                                <Menu.Item
+                                    onPress={() => {
+                                        setEditItem(item);
+                                        setItemName(item.name);
+                                        setAddress(item.address);
+                                        setPhone(item.phone);
+                                        setStatus(item.status);
+                                        setIsEditModalVisible(true);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Edit Karyawan"
+                                    leadingIcon={() => <Icon name='create' size={20} color='#F79300' />}
+                                />
+                                <Menu.Item
+                                    onPress={() => {
+                                        handleDeleteData(item.id);
+                                        setVisibleMenu(null);
+                                    }}
+                                    title="Hapus Karyawan"
+                                    leadingIcon={() => <Icon name='trash' size={20} color="red" />}
+                                />
+                            </Menu>
+                        </View>
+                    )}
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    contentContainerStyle={{ paddingBottom: 10 }}
+                    ListEmptyComponent={() => (
+                        <View style={styles.emptyComponent}>
+                            <Text style={{ color: "#888" }}>Tidak ada data yang ditemukan</Text>
+                        </View>
+                    )}
+                    style={{ flex: 1 }}
+                />
+
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isModalVisible}
+                    onRequestClose={() => setIsModalVisible(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPressOut={() => setIsModalVisible(false)}
+                    >
+                        <TouchableOpacity
+                            style={styles.modalContent}
+                            activeOpacity={1}
+                            onPress={() => {}}
+                        >
+                            <Text style={styles.modalTitle}>Tambah Data</Text>
+                            <TextInput
+                                placeholder="Nama Karyawan"
+                                style={styles.input}
+                                value={itemName}
+                                onChangeText={setName}
+                            />
+                            <TextInput
+                                placeholder="No Telepon"
+                                style={styles.input}
+                                value={phone}
+                                onChangeText={setPhone}
+                                keyboardType="phone-pad"
+                            />
+                            <TextInput
+                                placeholder="Alamat"
+                                style={styles.input}
+                                value={address}
+                                onChangeText={setAddress}
+                            />
+                            <View style={styles.dropdownContainer}>
+                                <Picker
+                                    selectedValue={status}
+                                    onValueChange={(itemValue) => setStatus(itemValue)}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Pilih Status" value="" />
+                                    <Picker.Item label="PKWT" value="PKWT" />
+                                    <Picker.Item label="PKWTT" value="PKWTT" />
+                                </Picker>
+                            </View>
+                            <TouchableOpacity style={styles.modalButton} onPress={handleAddData}>
+                                <Text style={styles.modalButtonText}>Tambah Data</Text>
+                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={isEditModalVisible}
+                    onRequestClose={() => setIsEditModalVisible(false)}
+                >
+                    <TouchableOpacity
+                        style={styles.modalOverlay}
+                        activeOpacity={1}
+                        onPressOut={() => setIsEditModalVisible(false)}
+                    >
+                        <TouchableOpacity
+                            style={styles.modalContent}
+                            activeOpacity={1}
+                            onPress={() => {}}
+                        >
+                            <Text style={styles.modalTitle}>Edit Data Karyawan</Text>
+                            <TextInput
+                                placeholder="Nama Karyawan"
+                                style={styles.input}
+                                value={itemName}
+                                onChangeText={setName}
+                            />
+                            <TextInput
+                                placeholder="No Telepon"
+                                style={styles.input}
+                                value={phone}
+                                onChangeText={setPhone}
+                                keyboardType="phone-pad"
+                            />
+                            <TextInput
+                                placeholder="Alamat"
+                                style={styles.input}
+                                value={address}
+                                onChangeText={setAddress}
+                            />
+                            <View style={styles.dropdownContainer}>
+                                <Picker
+                                    selectedValue={status}
+                                    onValueChange={(itemValue) => setStatus(itemValue)}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Pilih Status" value="" />
+                                    <Picker.Item label="PKWT" value="PKWT" />
+                                    <Picker.Item label="PKWTT" value="PKWTT" />
+                                </Picker>
+                            </View>
+                            <TouchableOpacity style={styles.modalButton} onPress={handleEditData}>
+                                <Text style={styles.modalButtonText}>Simpan Perubahan</Text>
+                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={isSuccessVisible}
+                    onRequestClose={() => setIsSuccessVisible(false)}
+                >
+                    <View style={styles.successContainer}>
+                        <View style={styles.successContent}>
+                            <Icon name="create" size={32} color="green" />
+                            <Text style={styles.successText}>Berhasil Ditambahkan!</Text>
+                        </View>
+                    </View>
+                </Modal>
+            </View>
         </View>
     );
 };
@@ -277,11 +359,10 @@ const styles = StyleSheet.create({
     },
     addButton: {
         backgroundColor: '#F79300',
-        padding: 10,
+        padding: 12,
         borderRadius: 5,
         alignItems: 'center',
-        marginVertical: 10,
-        marginHorizontal: 16,
+        marginBottom: 16,
     },
     addButtonText: {
         color: 'white',
@@ -296,8 +377,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 16,
     },
     employeeText: {
-        flex: 1,
-        fontSize: 14,
+        fontSize: 18,
+        marginLeft: 16,
+        fontWeight: 'bold',
+        color: "black"
     },
     icon: {
         fontSize: 18,
@@ -367,6 +450,55 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         color: 'green',
+    },
+    content: {
+        padding: 16,
+        flex: 1,
+    },
+    searchSortContainer: {
+        flexDirection: 'row',
+        marginBottom: 16,
+        alignItems: 'center',
+    },
+    filterButton: {
+        marginLeft: 10,
+        padding: 10,
+        width: 44,
+        height: 44,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    searchInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 10,
+        height: 44,
+    },
+    card: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        width: '100%',
+        height: 100,
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        alignItems: 'center',
+    },
+    emptyComponent: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
     },
 });
 
