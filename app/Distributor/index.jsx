@@ -290,7 +290,7 @@ const Distributor = () => {
                 <View style={styles.successContainer}>
                     <View style={styles.successContent}>
                         <Icon name="checkmark-circle" size={50} color="green" />
-                        <Text style={styles.successText}>Data berhasil disimpan!</Text>
+                        <Text style={styles.successText}>Data Berhasil Disimpan!</Text>
                     </View>
                 </View>
             </Modal>

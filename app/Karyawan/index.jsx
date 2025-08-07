@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import { use } from 'react';
 import { IconButton, Menu } from 'react-native-paper';
+import { add } from 'react-native-reanimated';
 
 const API_URL = 'http://10.0.2.2:8000/api/employees';
 
@@ -54,12 +55,15 @@ const EmployeeData = () => {
         try {
             const newItem = { name: itemName, phone: phone, address: address, status: status  };
             const response = await axios.post(API_URL, newItem);
-            setData([response.data.data, ...data]);
+            setData([response.data.employee, ...data]);
             setIsSuccessVisible(true);
             setIsModalVisible(false);
+            setTimeout(() => setIsSuccessVisible(false), 2000);
             resetForm();
         } catch (error) {
             Alert.alert('Error', 'Gagal menambahkan data');
+            console.error('Error adding data:', error);
+
         }
     };
 
@@ -70,6 +74,7 @@ const EmployeeData = () => {
             setData(data.map(item => (item.id === editItem.id ? { ...item, ...updatedItem } : item)));
             setIsSuccessVisible(true);
             setIsEditModalVisible(false);
+            setTimeout(() => setIsSuccessVisible(false), 2000);
             resetForm();
         } catch (error) {
             Alert.alert('Error', 'Gagal mengubah data');
@@ -196,111 +201,81 @@ const EmployeeData = () => {
                     style={{ flex: 1 }}
                 />
 
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isModalVisible}
-                    onRequestClose={() => setIsModalVisible(false)}
-                >
-                    <TouchableOpacity
-                        style={styles.modalOverlay}
-                        activeOpacity={1}
-                        onPressOut={() => setIsModalVisible(false)}
-                    >
-                        <TouchableOpacity
-                            style={styles.modalContent}
-                            activeOpacity={1}
-                            onPress={() => {}}
-                        >
-                            <Text style={styles.modalTitle}>Tambah Data</Text>
+                <Modal visible={isEditModalVisible} animationType='slide' transparent={true}>
+                    <TouchableOpacity style={styles.modalContainer} onPress={() => {setIsEditModalVisible(false); resetForm();}}>
+                        <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+                            <Text style={styles.modalTitle}>Edit Data</Text>
                             <TextInput
-                                placeholder="Nama Karyawan"
+                                placeholder='Nama Karyawan'
                                 style={styles.input}
                                 value={itemName}
-                                onChangeText={setName}
+                                onChangeText={setItemName}
                             />
                             <TextInput
-                                placeholder="No Telepon"
+                                placeholder='No. Telepon'
                                 style={styles.input}
                                 value={phone}
                                 onChangeText={setPhone}
-                                keyboardType="phone-pad"
+                                keyboardType='numeric'
                             />
                             <TextInput
-                                placeholder="Alamat"
+                                placeholder='Alamat'
                                 style={styles.input}
                                 value={address}
                                 onChangeText={setAddress}
                             />
-                            <View style={styles.dropdownContainer}>
-                                <Picker
-                                    selectedValue={status}
-                                    onValueChange={(itemValue) => setStatus(itemValue)}
-                                    style={styles.picker}
-                                >
-                                    <Picker.Item label="Pilih Status" value="" />
-                                    <Picker.Item label="PKWT" value="PKWT" />
-                                    <Picker.Item label="PKWTT" value="PKWTT" />
-                                </Picker>
-                            </View>
-                            <TouchableOpacity style={styles.modalButton} onPress={handleAddData}>
-                                <Text style={styles.modalButtonText}>Tambah Data</Text>
+                            <Picker
+                                selectedValue={status}
+                                onValueChange={(itemValue) => setStatus(itemValue)}
+                                style={styles.input}
+                            >
+                                <Picker.Item label='Pilih Status' value="" />
+                                <Picker.Item label="PKWT" value="PKWT" />
+                                <Picker.Item label="PKWTT" value="PKWTT" />
+                            </Picker>
+                            <TouchableOpacity style={styles.submitButton} onPress={handleEditData}>
+                                <Text style={styles.submitButtonText}>Simpan Perubahan</Text>
                             </TouchableOpacity>
-                        </TouchableOpacity>
+                        </View>
                     </TouchableOpacity>
                 </Modal>
 
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isEditModalVisible}
-                    onRequestClose={() => setIsEditModalVisible(false)}
-                >
-                    <TouchableOpacity
-                        style={styles.modalOverlay}
-                        activeOpacity={1}
-                        onPressOut={() => setIsEditModalVisible(false)}
-                    >
-                        <TouchableOpacity
-                            style={styles.modalContent}
-                            activeOpacity={1}
-                            onPress={() => {}}
-                        >
-                            <Text style={styles.modalTitle}>Edit Data Karyawan</Text>
+                <Modal animationType='slide' transparent={true} visible={isModalVisible}>
+                    <TouchableOpacity style={styles.modalContainer} onPress={() => setIsModalVisible(false)}>
+                        <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+                            <Text style={styles.modalTitle}>Tambah Data</Text>
                             <TextInput
-                                placeholder="Nama Karyawan"
+                                placeholder='Nama Karyawan'
                                 style={styles.input}
                                 value={itemName}
-                                onChangeText={setName}
+                                onChangeText={setItemName}
                             />
                             <TextInput
-                                placeholder="No Telepon"
+                                placeholder='No. Telepon'
                                 style={styles.input}
                                 value={phone}
                                 onChangeText={setPhone}
-                                keyboardType="phone-pad"
+                                keyboardType='numeric'
                             />
                             <TextInput
-                                placeholder="Alamat"
+                                placeholder='Alamat'
                                 style={styles.input}
                                 value={address}
                                 onChangeText={setAddress}
                             />
-                            <View style={styles.dropdownContainer}>
-                                <Picker
-                                    selectedValue={status}
-                                    onValueChange={(itemValue) => setStatus(itemValue)}
-                                    style={styles.picker}
-                                >
-                                    <Picker.Item label="Pilih Status" value="" />
-                                    <Picker.Item label="PKWT" value="PKWT" />
-                                    <Picker.Item label="PKWTT" value="PKWTT" />
-                                </Picker>
-                            </View>
-                            <TouchableOpacity style={styles.modalButton} onPress={handleEditData}>
-                                <Text style={styles.modalButtonText}>Simpan Perubahan</Text>
+                            <Picker
+                                selectedValue={status}
+                                onValueChange={(itemValue) => setStatus(itemValue)}
+                                style={styles.input}
+                            >
+                                <Picker.Item label='Pilih Status' value="" />
+                                <Picker.Item label="PKWT" value="PKWT" />
+                                <Picker.Item label="PKWTT" value="PKWTT" />
+                            </Picker>
+                            <TouchableOpacity style={styles.submitButton} onPress={handleAddData}>
+                                <Text style={styles.submitButtonText}>Tambah Data</Text>
                             </TouchableOpacity>
-                        </TouchableOpacity>
+                        </View>
                     </TouchableOpacity>
                 </Modal>
 
@@ -308,14 +283,74 @@ const EmployeeData = () => {
                     animationType="fade"
                     transparent={true}
                     visible={isSuccessVisible}
-                    onRequestClose={() => setIsSuccessVisible(false)}
                 >
                     <View style={styles.successContainer}>
                         <View style={styles.successContent}>
-                            <Icon name="create" size={32} color="green" />
-                            <Text style={styles.successText}>Berhasil Ditambahkan!</Text>
+                            <Icon name="checkmark-circle" size={50} color="green" />
+                            <Text style={styles.successText}>Data Berhasil Disimpan!</Text>
                         </View>
                     </View>
+                </Modal>
+
+                <Modal
+                    visible={isSortModalVisible}
+                    animationType='slide'
+                    transparent={true}
+                    onRequestClose={() => setIsSortModalVisible(false)}
+                >
+                    <TouchableOpacity activeOpacity={1} style={styles.modalOverlay} onPress={() => setIsSortModalVisible(false)}>
+                        <TouchableOpacity activeOpacity={1} style={styles.bottomSheet} onPress={() => {}}>
+                            <View style={styles.sortHeader}>
+                                <Text style={styles.sortTitle}>Urutkan Berdasarkan</Text>
+                                <TouchableOpacity onPress={() => setIsSortModalVisible(false)} style={styles.closeButton}>
+                                    <Icon name='close' size={24} color='#000' />
+                                </TouchableOpacity>
+                            </View>
+
+                            {[
+                                { label: 'Terbaru', value: 'latest' },
+                                { label: 'Terlama', value: 'oldest' },
+                                { label: 'A-Z', value: 'az' },
+                                { label: 'Z-A', value: 'za' },
+                            ].map(option => (
+                                <TouchableOpacity
+                                    key={option.value}
+                                    style={styles.sortOption}
+                                    onPress={() => {
+                                        setSortOption(option.value);
+                                        setIsSortModalVisible(false);
+                                    }}
+                                >
+                                    <View style={styles.radioCircle}>
+                                        {sortOption === option.value && <View style={styles.selectedRb} />}
+                                    </View>
+                                    <Text style={styles.sortOptionText}>{option.label}</Text>
+                                </TouchableOpacity>
+                            ))}
+
+                        </TouchableOpacity>
+                    </TouchableOpacity>
+                </Modal>
+
+                <Modal visible={isDetailModalVisible} animationType='slide' transparent={true}>
+                    <TouchableOpacity style={styles.modalContainer} onPress={() => setIsDetailModalVisible(false)}>
+                        <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
+                            <Text style={styles.modalTitle}>Detail Karyawan</Text>
+                            {selectedItem ? (
+                                <>
+                                    <Text style={styles.input}>Nama Karyawan: {selectedItem.name}</Text>
+                                    <Text style={styles.input}>Alamat: {selectedItem.address}</Text>
+                                    <Text style={styles.input}>No. Telepon: {selectedItem.phone}</Text>
+                                    <Text style={styles.input}>Status: {selectedItem.status}</Text>
+                                </>
+                            ) : (
+                                <Text>Tidak ada detail yang tersedia</Text>
+                            )}
+                            <TouchableOpacity style={styles.submitButton} onPress={() => setIsDetailModalVisible(false)}>
+                                <Text style={styles.submitButtonText}>Tutup</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </TouchableOpacity>
                 </Modal>
             </View>
         </View>
@@ -389,28 +424,26 @@ const styles = StyleSheet.create({
     modalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'flex-end',
     },
     modalContent: {
-        width: '80%',
+        width: 300,
         backgroundColor: 'white',
         padding: 20,
-        borderRadius: 10,
-        alignItems: 'center',
+        borderRadius: 8,
     },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: 16,
+        textAlign: 'center',
     },
     input: {
-        width: '100%',
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
-        marginBottom: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        marginBottom: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
     },
     dropdownContainer: {
         width: '100%',
@@ -499,6 +532,69 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    submitButton: {
+        backgroundColor: '#F79300',
+        padding: 12,
+        borderRadius: 4,
+        alignItems: 'center',
+        marginTop: 16,
+    },
+    submitButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 16,
+    },
+    bottomSheet: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 20,
+        maxHeight: '50%',
+        paddingTop: 30,
+        paddingBottom: 20,
+        paddingHorizontal: 24,
+    },
+    sortHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    sortTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    sortOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    radioCircle: {
+        height: 20,
+        width: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: '#F79300',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 10,
+    },
+    selectedRb: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#F79300',
+    },
+    sortOptionText: {
+        fontSize: 16,
+        color: '#333',
     },
 });
 

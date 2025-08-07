@@ -253,6 +253,19 @@ const Barang = () => {
           </TouchableOpacity>
         </Modal>
 
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isSuccessVisible}
+        >
+          <View style={styles.successContainer}>
+            <View style={styles.successContent}>
+              <Icon name="checkmark-circle" size={50} color="green" />
+              <Text style={styles.successText}>Data Berhasil Disimpan!</Text>
+            </View>
+          </View>
+        </Modal>
+
         <Modal visible={isEditModalVisible} animationType="slide" transparent={true}>
           <TouchableOpacity style={styles.modalContainer} onPress={() => {setIsEditModalVisible(false); resetForm();}}>
             <View style={styles.modalContent} onStartShouldSetResponder={(e) => e.stopPropagation()}>
