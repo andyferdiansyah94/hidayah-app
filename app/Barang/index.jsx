@@ -66,6 +66,9 @@ const Barang = () => {
       setData([response.data.data, ...data ]);
       setIsModalVisible(false);
       setIsSuccessVisible(true);
+      setTimeout(() => {
+        setIsSuccessVisible(false);
+      }, 1000);
       resetForm();
     } catch (error) {
       console.error('Error adding data:', error);
