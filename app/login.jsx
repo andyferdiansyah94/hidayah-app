@@ -76,7 +76,7 @@ const Login = () => {
         }, 1500);
       }      
     } catch (error) {
-      // console.error('Login Error:', error);
+      console.error('Login Error:', error);
 
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
 
@@ -104,6 +104,7 @@ const Login = () => {
           placeholder="Username"
           value={username}
           onChangeText={setUsername}
+          autoCapitalize='none'
         />
 
         <Text style={styles.label}>Password</Text>
