@@ -22,13 +22,14 @@ const LaporanPenjualan = () => {
   const [dataPelanggan, setDataPelanggan] = useState([]);
   const [selectedItem, setSelectedItem] = useState('');
   const [selectedHarga, setSelectedHarga] = useState(0);
-  const [selectedPelanggan, setSelectedPelanggan] = useState('');
+  const [selectedPelanggan, setSelectedPelanggan] = useState(14);
   const [tableData, setTableData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [totalHarga, setTotalHarga] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const [selectedBarang, setSelectedBarang] = useState('');
   const [selectedJasa, setSelectedJasa] = useState('');
+  const [loadingPelanggan, setLoadingPelanggan] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,6 +40,7 @@ const LaporanPenjualan = () => {
         setDataJasa(jasaResponse.data.data);
         const pelangganResponse = await axios.get('http://10.0.2.2:8000/api/pelanggan');
         setDataPelanggan(pelangganResponse.data.data);
+        setLoadingPelanggan(false);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -246,7 +248,20 @@ const LaporanPenjualan = () => {
         </View>
 
         <View style={styles.pickerContainer}>
-          <Picker
+          {loadingPelanggan ? (
+            <Text style={{padding: 15, color: '#666'}}>Memuat pelanggan...</Text>
+          ) : (
+            <Picker
+              selectedValue={selectedPelanggan}
+              onValueChange={(value) => setSelectedPelanggan(value)}
+              style={styles.picker}
+            >
+              {dataPelanggan.map((item) => (
+                <Picker.Item key={item.id} label={item.name} value={item.id} />
+              ))}
+            </Picker>
+          )}
+          {/* <Picker
             selectedValue={selectedPelanggan}
             onValueChange={(value) => setSelectedPelanggan(value)}
             style={styles.picker}
@@ -255,7 +270,7 @@ const LaporanPenjualan = () => {
             {dataPelanggan.map((item) => (
               <Picker.Item key={item.id} label={item.name} value={item.id} />
             ))}
-          </Picker>
+          </Picker> */}
         </View>
 
         <TouchableOpacity
