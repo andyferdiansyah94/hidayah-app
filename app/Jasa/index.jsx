@@ -79,6 +79,9 @@ const Jasa = () => {
             setData([response.data.data, ...data]);
             setIsModalVisible(false);
             setIsSuccessVisible(true);
+            setTimeout(() => {
+                setIsSuccessVisible(false);
+            }, 1000);
             resetForm();
         } catch (error) {
             Alert.alert('Error', 'Gagal untuk menambahkan data');
@@ -239,6 +242,15 @@ const Jasa = () => {
                             </TouchableOpacity>
                         </View>
                     </TouchableOpacity>
+                </Modal>
+
+                <Modal visible={isSuccessVisible} animationType='fade' transparent={true}>
+                    <View style={styles.successContainer}>
+                        <View style={styles.successContent}>
+                            <Icon name="checkmark-circle" size={50} color="green" />
+                            <Text style={styles.successText}>Data Berhasil Disimpan!</Text>
+                        </View>
+                    </View>
                 </Modal>
 
                 <Modal visible={isEditModalVisible} animationType='slide' transparent={true}>
