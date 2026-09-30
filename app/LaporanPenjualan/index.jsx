@@ -261,16 +261,6 @@ const LaporanPenjualan = () => {
               ))}
             </Picker>
           )}
-          {/* <Picker
-            selectedValue={selectedPelanggan}
-            onValueChange={(value) => setSelectedPelanggan(value)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Nama Pelanggan" value="" />
-            {dataPelanggan.map((item) => (
-              <Picker.Item key={item.id} label={item.name} value={item.id} />
-            ))}
-          </Picker> */}
         </View>
 
         <TouchableOpacity
